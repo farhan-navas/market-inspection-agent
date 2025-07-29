@@ -1,0 +1,40 @@
+# Python-specific ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+build/
+dist/
+*.egg-info/
+.coverage
+.tox/
+.mypy_cache/
+.pytest_cache/
+htmlcov/
+.ipynb_checkpoints/
+*.sqlite3
+*.db
+
+# uv-specific ignores
+uv.lock
+.uv/
+
+# FastAPI-specific ignores (if applicable)
+# For example, if you generate documentation files or build artifacts
+# docs/
+# build_docs/
+
+# Editor/IDE specific ignores (example for VS Code and JetBrains IDEs)
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Operating System specific ignores
+.DS_Store
+Thumbs.db
