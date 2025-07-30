@@ -15,6 +15,7 @@ can always convert into a microservice architecture, but not necessary for now.
 - Bundled with Vite for faster development
 - SWC instead of Babel for "speedier" compile times
 - TailwindCSS
+- React Router v7 Data Mode, for navigation
 - ...
 
 ## Backend
