@@ -1,9 +1,9 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from signalling_model import SignalCompany
+from expansion_eval_model import ExpansionEvalCompany
 from ingested_models import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
 
-class MergedCompany(SignalCompany):
+class MergedCompany(ExpansionEvalCompany):
     finance_metrics: FinancialMetrics = Field(
         ..., description="Classified financial metrics of the company"
     )

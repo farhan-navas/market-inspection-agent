@@ -1,9 +1,10 @@
 import asyncio
 from semantic_kernel.functions import kernel_function
-from typing import List
+from typing import Optional
 import backend.app.descriptions as descriptions
 from main import project
-from company_models import CompanyInformation, BaseScanner
+
+from app.models.company_models import CompanyInformation, BaseScannerList
 
 class BaseScannerSkill:    
     def __init__(self):
@@ -13,7 +14,7 @@ class BaseScannerSkill:
             name="fetch_companies", 
             description=descriptions.BASE_SCANNER_SKILL_DESCRIPTION
     )
-    async def fetch_companies(self, industry: str = None, region: str = None, country: str = None) -> dict:
+    async def fetch_companies(self, industry: str, region: Optional[str], country: Optional[str]) -> BaseScannerList:
 
         # Fetch companies based on industry, region, and country
         filters = {}

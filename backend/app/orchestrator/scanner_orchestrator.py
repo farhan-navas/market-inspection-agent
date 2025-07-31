@@ -10,7 +10,7 @@ from backend.app.skills.region_split_skill import RegionSplitSkill
 from backend.app.skills.ingestion_skill import IngestionSkill
 from backend.app.skills.classification_skill import ClassificationSkill
 from backend.app.skills.scoring_skill import ScoringSkill
-from backend.app.skills.signalling_skill import SignallingSkill
+from backend.app.skills.expansion_eval_skill import ExpansionEvalSkill
 from backend.app.skills.overall_ranking_skill import OverallRankingSkill
 from backend.app.skills.rationale_skill import RationaleSkill
 from backend.app.skills.storage_skill import StorageSkill
@@ -31,7 +31,7 @@ region_split_skill = RegionSplitSkill()
 ingestion_skill = IngestionSkill()
 classification_skill = ClassificationSkill()
 scoring_skill = ScoringSkill()
-signalling_skill = SignallingSkill()
+expansion_eval_skill = ExpansionEvalSkill()
 overall_ranking_skill = OverallRankingSkill()
 rationale_skill = RationaleSkill()
 storage_skill = StorageSkill()
@@ -43,7 +43,7 @@ region_split_skill = kernel.add_plugin(region_split_skill, "Region Splitter")
 ingsestion_skill = kernel.add_plugin(ingestion_skill, "Ingestion")
 classification_skill = kernel.add_plugin(classification_skill, "Classify")
 ranking_skill = kernel.add_plugin(scoring_skill, "Scoring")
-signal_skill = kernel.add_plugin(signalling_skill, "Signal")
+signal_skill = kernel.add_plugin(expansion_eval_skill, "Signal")
 overall_ranking_skill = kernel.add_plugin(overall_ranking_skill, "Overall Ranking")
 rationale_skill = kernel.add_plugin(rationale_skill, "Rationale")
 storage_skill = kernel.add_plugin(storage_skill, "Storage")
