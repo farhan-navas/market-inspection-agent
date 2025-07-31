@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from signalling_models import SignalCompany
+from signalling_model import SignalCompany
 from ingested_models import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
 
 class MergedCompany(SignalCompany):

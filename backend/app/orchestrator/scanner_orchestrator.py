@@ -6,6 +6,15 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.services.ai_service_client_base import AIServiceClientBase
 
 from backend.app.skills.base_scanner_skill import BaseScannerSkill
+from backend.app.skills.region_split_skill import RegionSplitSkill 
+from backend.app.skills.ingestion_skill import IngestionSkill
+from backend.app.skills.classification_skill import ClassificationSkill
+from backend.app.skills.scoring_skill import ScoringSkill
+from backend.app.skills.signalling_skill import SignallingSkill
+from backend.app.skills.overall_ranking_skill import OverallRankingSkill
+from backend.app.skills.rationale_skill import RationaleSkill
+from backend.app.skills.storage_skill import StorageSkill
+from backend.app.skills.vectorize_skill import VectorizeSkill
 
 # 1. Initialize Semantic Kernel with Azure OpenAI 
 kernel = Kernel()
@@ -16,18 +25,29 @@ kernel.add_service(
         endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         deployment_name="o4-mini",
     )
-)
+) 
+scanner_skill = BaseScannerSkill()
+region_split_skill = RegionSplitSkill()
+ingestion_skill = IngestionSkill()
+classification_skill = ClassificationSkill()
+scoring_skill = ScoringSkill()
+signalling_skill = SignallingSkill()
+overall_ranking_skill = OverallRankingSkill()
+rationale_skill = RationaleSkill()
+storage_skill = StorageSkill()
+# vectorize_skill = VectorizeSkill()
 
 # 2. Import each agent as a Semantic Kernel skill
-scanner_skill = kernel.add_plugin(BaseScannerSkill(), "Scanner")
-ingsestion_skill = kernel.add_plugin("./skills/ingestion_skill.py", "Ingestion")
-normalize_skill = kernel.import_skill("./skills/normalize_skill.py", "Normalize")
-classification_skill = kernel.import_skill("./skills/classification_skill.py", "Classify")
-signal_skill = kernel.import_skill("./skills/signal_skill.py", "Signal")
-ranking_skill = kernel.import_skill("./skills/ranking_skill.py", "Ranking")
-rationale_skill = kernel.import_skill("./skills/rationale_skill.py", "Rationale")
-storage_skill = kernel.import_skill("./skills/storage_skill.py", "Storage")
-
+scanner_skill = kernel.add_plugin(scanner_skill, "Scanner")
+region_split_skill = kernel.add_plugin(region_split_skill, "Region Splitter")
+ingsestion_skill = kernel.add_plugin(ingestion_skill, "Ingestion")
+classification_skill = kernel.add_plugin(classification_skill, "Classify")
+ranking_skill = kernel.add_plugin(scoring_skill, "Scoring")
+signal_skill = kernel.add_plugin(signalling_skill, "Signal")
+overall_ranking_skill = kernel.add_plugin(overall_ranking_skill, "Overall Ranking")
+rationale_skill = kernel.add_plugin(rationale_skill, "Rationale")
+storage_skill = kernel.add_plugin(storage_skill, "Storage")
+# vectorize_skill = kernel.add_plugin(vectorize_skill, "Vectorize")
 
 def shard_array(arr, size):
     """Split list into chunks of given size"""

@@ -14,6 +14,6 @@ class SignalCompany(CompanyMetricRanking):
     expansion_signals: ExpansionSignal = Field(..., description="List of expansion signals indicating regions and confidence levels")
 
 # output of signalling agent
-class SignalCompanies(BaseModel):
+class SignalCompaniesList(BaseModel):
     companies: List[SignalCompany] = Field(..., description="A list of signalled companies with their metrics and signals")
 
