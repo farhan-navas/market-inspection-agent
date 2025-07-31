@@ -1,10 +1,17 @@
 import { createBrowserRouter } from "react-router";
 import App from "./pages/App";
+import DashboardPage from "./pages/Dashboard";
+import ErrorPage from "./components/ErroBoundary";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/dashboard",
+    element: <DashboardPage />,
   },
 
   // temp page structure that i think we will use?
