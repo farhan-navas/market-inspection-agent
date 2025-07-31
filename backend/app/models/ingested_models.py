@@ -1,15 +1,7 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from metricsModels import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
 
-class CompanyInformation(BaseModel):
-    name: str = Field(..., description="The name of the company")
-    region: str = Field(..., description="The region where the company operates")
-    ticker: Optional[str] = Field(None, description="The stock ticker symbol of the company")
-    link: Optional[str] = Field(None, description="A link to the company's website or profile")
-
-class ScannerList(BaseModel):
-    companies: List[CompanyInformation] = Field(..., description="A list of company information objects")
+from company_models import CompanyInformation
 
 class FinancialMetrics(BaseModel):
     annual_revenue: float = Field(..., description="Annual revenue of the company")
@@ -30,12 +22,11 @@ class RealEstateMetrics(BaseModel):
     consolidation_count: Optional[int] = Field(None, description="Number of consolidation activities")
     relocation_news_count: Optional[int] = Field(None, description="Number of news articles related to real estate relocation in the last 6 months")
 
-class CompanyMetrics(BaseModel):
-    company: CompanyInformation = Field(..., description="Basic information about the company")
-    finance_metrics: FinancialMetrics = Field(..., description="Financial metrics of the company")
+class CompanyMetrics(CompanyInformation):
+    financial_metrics: FinancialMetrics = Field(..., description="Financial metrics of the company")
     employee_metrics: EmployeeMetrics = Field(..., description="Employee-related metrics of the company")
     real_estate_metrics: RealEstateMetrics = Field(..., description="Real estate-related metrics of the company")
 
+# output from ingestion agent
 class IngestedList(BaseModel):
     companies: List[CompanyMetrics] = Field(..., description="A list of company metrics objects")
-
