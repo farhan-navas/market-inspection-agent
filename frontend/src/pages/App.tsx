@@ -59,21 +59,6 @@ export default function Example() {
           />
         </div>
       </div>
-      <div className="mx-auto max-w-2xl py-24 sm:py-32 lg:py-40">
-        <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
-          Growth Dashboard
-        </h2>
-        <p className="mt-6 text-lg font-medium text-gray-500">
-          Explore the latest trends and insights in the market with our
-          comprehensive growth dashboard.
-        </p>
-      </div>
-      {/* Insert growth dashboard such that it is directly below the above message and is centred */}
-      <div className="mx-auto max-w-fit overflow-x-auto p-4">
-        <div className="inline-block min-w-full">
-          <IndustryGrowthDashBoard />
-       </div>
-      </div>
     </div>
   );
 }
