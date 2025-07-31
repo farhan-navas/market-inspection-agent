@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 // ---- backend endpoint ----
 const BACKEND_URL = "http://127.0.0.1:8000"
@@ -50,7 +51,6 @@ const COUNTRY_OPTIONS = [
 ]
 
 // --- helpers (safe) ---
-// show all when query is empty; otherwise substring match
 const filterOptions = (query: string | undefined, list: string[]) =>
   !query
     ? list
@@ -61,6 +61,8 @@ const exactMatch = (query: string | undefined, list: string[]) =>
   !!query && list.some((item) => item.toLowerCase() === query.trim().toLowerCase())
 
 export default function IndustryRegionCountryForm() {
+  const navigate = useNavigate()
+
   const {
     register,
     handleSubmit,
@@ -76,7 +78,7 @@ export default function IndustryRegionCountryForm() {
     },
   })
 
-  // normalize watched values so downstream always has string (could be "")
+  // normalize watched values
   const industryValRaw = watch("industry")
   const industryVal = typeof industryValRaw === "string" ? industryValRaw : ""
   const regionValRaw = watch("region")
@@ -94,17 +96,15 @@ export default function IndustryRegionCountryForm() {
   const isExactCountry = exactMatch(countryVal, COUNTRY_OPTIONS)
 
   const onSubmit = async (values: FormValues) => {
-    const payload: Record<string, string> = {
+    const payload: Record<string, string | null> = {
       industry: values.industry,
     }
-    if (values.region && values.region !== "") {
-      payload.region = values.region
-    }
-    if (values.country && values.country !== "") {
-      payload.country = values.country
-    }
+
+    payload.region = values.region ?? null
+    payload.country = values.country ?? null
 
     try {
+      console.log(payload)
       setStatus("Submitting...")
       const resp = await axios.post(ENDPOINT, payload, {
         headers: { "Content-Type": "application/json" },
@@ -112,6 +112,8 @@ export default function IndustryRegionCountryForm() {
       })
       setStatus("Submitted successfully.")
       console.log("Backend response:", resp.data)
+      // redirect to dashboard
+      navigate("/dashboard")
     } catch (err: any) {
       let msg = "Failed to submit"
       if (err.response) {
