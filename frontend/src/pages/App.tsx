@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { IndustryGrowthDashBoard } from "@/components/industry_growth_dashboard";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -167,6 +168,21 @@ export default function Example() {
             className="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-288.75"
           />
         </div>
+      </div>
+      <div className="mx-auto max-w-2xl py-24 sm:py-32 lg:py-40">
+        <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
+          Growth Dashboard
+        </h2>
+        <p className="mt-6 text-lg font-medium text-gray-500">
+          Explore the latest trends and insights in the market with our
+          comprehensive growth dashboard.
+        </p>
+      </div>
+      {/* Insert growth dashboard such that it is directly below the above message and is centred */}
+      <div className="mx-auto max-w-fit overflow-x-auto p-4">
+        <div className="inline-block min-w-full">
+          <IndustryGrowthDashBoard />
+       </div>
       </div>
     </div>
   );
