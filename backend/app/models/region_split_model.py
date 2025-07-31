@@ -33,5 +33,5 @@ class EMEARegionSplit(CompanyInformation):
 # outputs from the region split model
 class RegionSplitList(BaseModel):
     companies: List[AustraliaRegionSplit | USRegionSplit | AsiaRegionSplit | EMEARegionSplit] = Field(
-        ..., description="All companies in the Australia region"
+        ..., description="Generic list of companies that cover all defined regions: Australia, US, Asia, and EMEA"
     )
