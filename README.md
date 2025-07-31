@@ -25,3 +25,11 @@ can always convert into a microservice architecture, but not necessary for now.
 - ...
 
 Document for every PR
+
+ideal scenario :
+
+- crystal ball that gives you a visual answer. which companies, what are their needs, why are they needing this. Can be micro trend. Look for specific people in charge, that they actually talk to in the company. data center, business park, ...
+
+search criteria: industry, region, service required by the company from capitaland
+
+sales, lead generation, but data nust be accurate. social media/linkedin parsing
