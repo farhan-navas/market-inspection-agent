@@ -7,7 +7,7 @@ from semantic_kernel.services.ai_service_client_base import AIServiceClientBase
 
 from backend.app.skills.base_scanner_skill import BaseScannerSkill
 
-# 1. Initialize Semantic Kernel with Azure OpenAI
+# 1. Initialize Semantic Kernel with Azure OpenAI 
 kernel = Kernel()
 
 kernel.add_service(
