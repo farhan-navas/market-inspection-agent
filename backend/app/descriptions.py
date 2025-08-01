@@ -1,6 +1,6 @@
 BASE_SCANNER_SKILL_DESCRIPTION = """
-Take a list of company names and query public APIs to fetch each firm’s region code, ticker (if public), and official website link.
-It then outputs a clean, standardized JSON mapping of company names to these structured data fields.
+Take an industry name and find all companies operating in that sector via public APIs and web sources, and fetches each company’s region code, website link, and (if public) 
+their ticker symbol. Outputs a clean JSON array of company information dictionaries.
 """
 
 REGION_SPLIT_SKILL_DESCRIPTION = """

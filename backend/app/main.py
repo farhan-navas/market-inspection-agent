@@ -19,6 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+model="o4-mini"
+
 project = AIProjectClient(
     endpoint="https://hackathon-group4-resource.services.ai.azure.com/api/projects/hackathon-group4",
     credential=DefaultAzureCredential()
