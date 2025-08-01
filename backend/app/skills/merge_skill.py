@@ -11,9 +11,6 @@ class OverallRankingSkill:
     def __init__(self):
         self.project = project
 
-    # def __init__(self, company_information_list: OverallRankingList):
-    #     self._company_information_list = company_information_list
-
-    @kernel_function(name="region_split_companies", description=descriptions.INGESTION_SKILL_DESCRIPTION)
-    async def classify_companies(self) -> List[MergedCompanyList]:
+    @kernel_function(name="merge_companies", description=descriptions.MERGE_SKILL_DESCRIPTION)
+    async def agent_function(self, company_information_list: OverallRankingList) -> MergedCompanyList:
      

@@ -56,9 +56,9 @@ def shard_array(arr, size):
 
 async def process_shard(shard):
     # Enrich
-    enriched_ctx = await kernel.run_async(
+    enriched_ctx = await kernel.invoke(
         {"companies": shard},
-        ingestion_skill.IngestionAgent
+        ingestion_skill.agent_function,
     )
     enriched = enriched_ctx.result
 
@@ -98,7 +98,7 @@ async def run_scan(opts: dict):
     # 1) Fetch raw list
     raw_ctx = await kernel.run_async(
         opts,
-        scanner_skill.ScannerAgent
+        scanner_skill.agent_function
     )
     raw_companies = raw_ctx.result
 

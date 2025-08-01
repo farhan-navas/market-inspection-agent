@@ -17,7 +17,7 @@ Validate each company’s profile for completeness and then segregate its metric
 employeeMetrics, and realEstateMetrics.
 """
 
-SCORING_SKILL_PROMPT = """
+SCORING_SKILL_DESCRIPITION = """
 Take in all companies in a region, normalizes each metric against that cohort’s 5th and 95th percentiles, and then aggregates them into three 0–100 scores — 
 financialScore, employeeScore, and realEstateScore—for easy comparison and prioritization
 """
