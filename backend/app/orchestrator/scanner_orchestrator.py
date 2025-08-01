@@ -3,8 +3,8 @@ import asyncio
 from main import DB_CONNECTION_URL
 
 from semantic_kernel import Kernel
+from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
-from semantic_kernel.services.ai_service_client_base import AIServiceClientBase
 
 from backend.app.skills.base_scanner_skill import BaseScannerSkill
 from backend.app.skills.region_split_skill import RegionSplitSkill 
@@ -15,7 +15,7 @@ from backend.app.skills.expansion_eval_skill import ExpansionEvalSkill
 from backend.app.skills.overall_ranking_skill import OverallRankingSkill
 from backend.app.skills.rationale_skill import RationaleSkill
 from backend.app.skills.storage_skill import StorageSkill
-from backend.app.skills.vectorize_skill import VectorizeSkill
+# from backend.app.skills.vectorize_skill import VectorizeSkill
 
 from backend.app.models.company_models import BaseScannerList
 
@@ -61,14 +61,14 @@ async def process_shard(shard: BaseScannerList):
     # Enrich
     enriched_ctx = await kernel.invoke(
         ingestion_skill.agent_function,
-        shard,
+        KernelArguments(companies=shard),
     )
-    enriched = enriched_ctx.result
+    enriched = enriched_ctx.value if enriched_ctx is not None else ''
 
-    # Normalize
-    clean_ctx = await kernel.run_async(
-        {"companies": enriched},
-        normalize_skill.NormalizeAgent
+    # Region Split
+    clean_ctx = await kernel.invoke(
+        region_split_skill.agent_function,
+        KernelArguments(companies=enriched),
     )
     cleaned = clean_ctx.result
 

@@ -15,7 +15,7 @@ class RegionSplitSkill:
         self.project = project
 
     @kernel_function(name="region_split_companies", description=descriptions.INGESTION_SKILL_DESCRIPTION)
-    async def region_split_companies(self, company_information_list: BaseScannerList) -> RegionSplitList:
+    async def agent_function(self, company_information_list: BaseScannerList) -> RegionSplitList:
         agent_id = "region_split_companies"
 
         agent = self.project.agents.create_agent(
