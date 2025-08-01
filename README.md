@@ -16,12 +16,15 @@ can always convert into a microservice architecture, but not necessary for now.
 - SWC instead of Babel for "speedier" compile times
 - TailwindCSS
 - React Router v7 Data Mode, for navigation
-- ...
+- shadcn components
+- zod
+- axios
 
 ## Backend
 
 - Python FastAPI backend
 - Azure AI Foundry
-- ...
+- semantic kernel
+- openAI api
 
 Document for every PR

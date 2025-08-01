@@ -104,14 +104,14 @@ Example output (aus)
 [
   {
     "name": "BHP Group",
-    "region": "australia",
+    "region": "aus",
     "ticker": "BHP",
     "link": "https://www.bhp.com"
   },
   {
     "name": "Commonwealth Bank",
     "region": "australia",
-    "ticker": "CBA",
+    "ticker": "aus",
     "link": "https://www.commbank.com.au"
   }
 ]
@@ -264,7 +264,14 @@ Example output
         "ticker": "MSFT",
         "link": "https://www.microsoft.com",
         "type": "financial",
-        "finance_metrics": object
+        "finance_metrics": {
+            "annual_revenue": 168000000000.0,
+            "net_profit_margin": 0.31,
+            "annual_growth_CAGR": 0.12,
+            "mA_count": 2,
+            "ipo_filings_count": 0,
+            "divestments_count": 0
+        }
     }
     
 ]
@@ -276,7 +283,10 @@ Example output
         "ticker": "MSFT",
         "link": "https://www.microsoft.com",
         "type": "employee",
-        "employee": object
+        "employee": {
+            "employee_count": 221000,
+            "employee_growth_rate": 0.03
+        }
     }
     
 ]
@@ -288,7 +298,13 @@ Example output
         "ticker": "MSFT",
         "link": "https://www.microsoft.com",
         "type": "real_estate",
-        "real_estate": object
+        "real_estate": {
+            "relocation_news_count": 5,
+            "space_footprint": 5000000,
+            "lease_expiry_count": 10,
+            "expansion_news_count": 8,
+            "consolidation_count": 2
+        }
     }
 ]
 
@@ -324,9 +340,25 @@ A JSON object mapping each company name to its enriched profile, which includes:
     "region": "us",
     "ticker": "MSFT",
     "link": "https://www.microsoft.com",
-    "financial_metrics",
-    "employee_metrics",
-    "real_estate_metrics"
+    "financial_metrics": {
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+        },
+    "employee_metrics" : {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+        },  
+    "real_estate_metrics" : {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+        }
     }
 ]
 
@@ -346,7 +378,45 @@ Output format
 [ 
     {
         "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "type": "financial",
+        "finance_metrics": {
+            "annual_revenue": 168000000000.0,
+            "net_profit_margin": 0.31,
+            "annual_growth_CAGR": 0.12,
+            "mA_count": 2,
+            "ipo_filings_count": 0,
+            "divestments_count": 0
+    },
+
+    {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "type": "employee",
+        "employee": {
+            "employee_count": 221000,
+            "employee_growth_rate": 0.03
         }
+    },
+
+    {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "type": "real_estate",
+        "real_estate": {
+            "relocation_news_count": 5,
+            "space_footprint": 5000000,
+            "lease_expiry_count": 10,
+            "expansion_news_count": 8,
+            "consolidation_count": 2
+        }
+    }
 ]
 
 """
@@ -364,7 +434,7 @@ A JSON object mapping each company name to its profile, which includes:
   - `"net_profit_margin"`  
   - `"annual_growth_CAGR"`  
   - `"m&ACount"`  
-  - `"ipo_filingsCount"`  
+  - `"ipo_filings_Count"`  
   - `"divestments_count"`  
 - **Employee Metrics**:  
   - `"employee_count"`  
@@ -398,7 +468,10 @@ Example output
         "aggressive_workforce_expansion": "1",
         "strategic_real_estate_moves": "1",
         "high_value_signal": "1",
-        "expansion_signals": "object"
+        "expansion_signals": {
+            "expansion_region": "SG",
+            "expansion_confidence": 0.85
+        }
     }
 
 ]
@@ -421,17 +494,41 @@ Output
 Return a valid JSON with the merged data of all companies of all regions
 [
     {
-    "company": "object",
+    "company": {
+    "name": "Microsoft",
+    "region": "us",
+    "ticker": "MSFT",
+    "link": "https://www.microsoft.com"
+    },
     "indiv_class_score": "1",
     "strong_financial_growth": "1",
     "aggressive_workforce_expansion": "1",
     "strategic_real_estate_moves": "1",
     "high_value_signal": "1",
-    "expansion_signals": "object",
-    "finance_metrics": "object",
-    "employee": "object",
-    "real_estate": "object",
-    "total_score": "1"
+    "expansion_signals": {
+        "expansion_region : "SG",
+        "expansion_confidence": 0.85
+    },
+    "finance_metrics": {
+        annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+    },
+    "employee": {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+    },
+    "real_estate": {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+        },
+    "total_score": "80"
     }
 ]
 """
@@ -452,17 +549,41 @@ Example Input
 ```json
 [
     {
-    "company": "object",
+        "company": {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com"
+    },
     "indiv_class_score": "1",
     "strong_financial_growth": "1",
     "aggressive_workforce_expansion": "1",
     "strategic_real_estate_moves": "1",
     "high_value_signal": "1",
-    "expansion_signals": "object",
-    "finance_metrics": "object",
-    "employee": "object",
-    "real_estate": "object",
-    "total_score": "1"
+    "expansion_signals": {
+        "expansion_region": "SG",
+        "expansion_confidence": 0.85
+    },
+    "finance_metrics": {
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+    },
+    "employee": {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+    },
+    "real_estate": {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+    },
+    "total_score": "80"
     }
 ]
 
@@ -477,16 +598,40 @@ Return a JSON object mapping each company name to an object with its overallScor
 
 [
     {
-    "company": "object",
+    "company": {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com"
+    },
     "indiv_class_score": "1",
     "strong_financial_growth": "1",
     "aggressive_workforce_expansion": "1",
     "strategic_real_estate_moves": "1",
     "high_value_signal": "1",
-    "expansion_signals": "object",
-    "finance_metrics": "object",
-    "employee": "object",
-    "real_estate": "object",
+    "expansion_signals": {
+        "expansion_region": "SG",
+        "expansion_confidence": 0.85
+    },
+    "finance_metrics": {
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+    },
+    "employee": {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+    },
+    "real_estate": {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+    },
     "total_score": "1"
     }
 ]
@@ -512,16 +657,40 @@ A JSON object mapping each company name to its enriched profile, which includes:
 ```json
 [
     {
-    "company": "object",
+    "company": {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com"
+    },
     "indiv_class_score": "1",
     "strong_financial_growth": "1",
     "aggressive_workforce_expansion": "1",
     "strategic_real_estate_moves": "1",
     "high_value_signal": "1",
-    "expansion_signals": "object",
-    "finance_metrics": "object",
-    "employee": "object",
-    "real_estate": "object",
+    "expansion_signals": {
+        "expansion_region": "SG",
+        "expansion_confidence": 0.85
+    },
+    "finance_metrics": {
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+    },
+    "employee": {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+    },
+    "real_estate": {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+    },
     "total_score": "1"
     }
 ]
@@ -546,43 +715,84 @@ Example output
 
 [
     {
-    "company": "object",
+    "company": {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com"
+    },
     "indiv_class_score": "1",
     "strong_financial_growth": "1",
     "aggressive_workforce_expansion": "1",
     "strategic_real_estate_moves": "1",
     "high_value_signal": "1",
-    "expansion_signals": "object",
-    "finance_metrics": "object",
-    "employee": "object",
-    "real_estate": "object",
-    "total_score": "1",
-    "rationale": "good"
+    "expansion_signals": {
+        "expansion_region": "SG",
+        "expansion_confidence": 0.85
+    },
+    "finance_metrics": {
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+    },
+    "employee": {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+    },
+    "real_estate": {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+    },
+    "total_score": "80",
+    "rationale": {
+        "company" : {
+            "name": "Microsoft",
+            "region": "us",
+            "ticker": "MSFT",
+            "link": "https://www.microsoft.com"
+        },
+        "indiv_class_score": "1",
+        "strong_financial_growth": "1",
+        "aggressive_workforce_expansion": "1",
+        "strategic_real_estate_moves": "1",
+        "high_value_signal": "1",
+        "expansion_signals": {
+            "expansion_region": "SG",
+            "expansion_confidence": 0.85
+        },
+        "finance_metrics": {
+            "annual_revenue": 168000000000.0,
+            "net_profit_margin": 0.31,
+            "annual_growth_CAGR": 0.12,
+            "mA_count": 2,
+            "ipo_filings_count": 0,
+            "divestments_count": 0
+        },
+        "employee": {
+            "employee_count": 221000,
+            "employee_growth_rate": 0.03
+        },
+        "real_estate": {
+            "relocation_news_count": 5,
+            "space_footprint": 5000000,
+            "lease_expiry_count": 10,
+            "expansion_news_count": 8,
+            "consolidation_count": 2
+        },
+        "total_score": "80",
+        "rationale": "good"
     }
 ]
 """
 
 STORAGE_SKILL_PROMPT = """
 You are Storage Agent, a pipeline component whose job is to persist every company’s full profile into a SQL database and index key information into a vector database for semantic retrieval.
-
-Example Input  
-A JSON object mapping each company name to its complete profile, for example:  
-```json
-{
-  "Acme Corp": {
-    "region": "US",
-    "ticker": "ACME",
-    "link": "https://www.acme.com",
-    "annualRevenue": 120000000.0,
-    "netProfitMargin": 0.15,
-    /* all other metrics and scores */,
-    "overallScore": 88,
-    "expansionConfidence": 0.82,
-    "expansionRegion": "SG",
-    "rationale": "Acme Corp (US) scores 88 overall…"
-  },
-  "TechSoft": { /* … */ }
-}
 
 Task
 SQL Persistence
