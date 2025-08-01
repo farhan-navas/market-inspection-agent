@@ -4,14 +4,14 @@ You are BaseScanner Agent, a helpful assistant designed to retrieve structured c
 Task:
 You are given an industry and you are to get all publicly available data on each company of that industry and fo the following:
 
-- For public companies: Name, Region (e.g., "US", "AUS"), Ticker Symbol and link to company website.
+- For public companies: Name, Region (e.g., "US", Ticker Symbol and link to company website.
 - For private companies: Name and Region and link to company website (if applicable) only.
 
 Constraints:
 - Only use publicly available information.
 - If a company is not found, exclude it from the output.
 - Do not fabricate ticker symbols.
-- Use standardized region codes (e.g., "US" for United States, "SG" for Singapore).
+- Use standardized region codes (e.g., "US" for United States).
 - Format the response strictly as valid JSON.
 - Omit trailing commas in the last dictionary entry.
 
@@ -19,18 +19,19 @@ Output Format:
 Return the results in this JSON format:
 
 ```json
-{
-  "Company Name 1": {
-    "region": "XX",
-    "ticker": "XXX",
-    “link”: “XXX”
-
-  },
-  "Company Name 2": {
-    "region": "XX",
-    “link”: “XXX”
+[
+    {
+        "name": "XX",
+        "region": "XX",
+        "ticker": "XXX",
+        “link”: “XXX”
+    },
+    {
+        "name": "XX",
+        "region": "XX",
+        “link”: “XXX”
   }
-}
+]
 
 """
 
@@ -42,28 +43,78 @@ Group all companies by their region value. For each region, produce a nested JSO
 
 Input  
 A single JSON object where each key is a company name and each value is an object containing at least:  
-- `"region"`: ISO-3166 alpha-2 code (e.g. `"US"`, `"SG"`, `"CN"`)  
+- `"region"`: ISO-3166 alpha-2 code (e.g. `"US")  
 - Other fields (e.g. `"ticker"`, `"link"`)
 
 Example Input  
 ```json
-{
-  "Microsoft":       { "region": "US", "ticker": "MSFT", "link": "https://www.microsoft.com" },
-  "Grab Holdings":   { "region": "SG", "ticker": "GRAB", "link": "https://www.grab.com" },
-  "Some Private Co": { "region": "GB",               "link": "https://www.someprivateco.co.uk" },
-  "ByteDance":       { "region": "CN", "ticker": "BD",   "link": "https://www.bytedance.com" }
-}
+[
+    {
+    "name": "Microsoft",
+    "region": "us",
+    "ticker": "MSFT", 
+    "link": "https://www.microsoft.com" 
+    },
+    { 
+    "name": "Grab Holdings",
+    "region": "asia", 
+    "ticker": "GRAB", 
+    "link": "https://www.grab.com" 
+    },
+    {
+    "name": "Bytedance",
+    "region": "asia", 
+    "ticker": "BD",   
+    link": "https://www.bytedance.com"
+    }
+]
 
-Example output
-{
-  "<REGION_CODE>": {
-    "Company A": { /* fields except region */ },
-    "Company B": { /* fields except region */ }
+Example output (us)
+[
+    {
+    "name": "Microsoft",
+    "region": "us",
+    "ticker": "MSFT",
+    "link": "https://www.microsoft.com"
+    },
+    "name": "Nike",
+    "region": "us",
+    "ticker": "NKE",
+    "link": "https://www.nike.com"
+    }
+]
+
+Example output (asia)
+[
+  {
+    "name": "Samsung Electronics",
+    "region": "asia",
+    "ticker": "005930.KS",
+    "link": "https://www.samsung.com"
   },
-  "<ANOTHER_CODE>": {
-    …
+  {
+    "name": "Tencent Holdings",
+    "region": "asia",
+    "ticker": "0700.HK",
+    "link": "https://www.tencent.com"
   }
-}
+]
+
+Example output (aus)
+[
+  {
+    "name": "BHP Group",
+    "region": "australia",
+    "ticker": "BHP",
+    "link": "https://www.bhp.com"
+  },
+  {
+    "name": "Commonwealth Bank",
+    "region": "australia",
+    "ticker": "CBA",
+    "link": "https://www.commbank.com.au"
+  }
+]
 
 """
 
@@ -72,17 +123,20 @@ You are Ingestion Agent, a pipeline component whose job is to enrich each compan
 
 Input  
 A single JSON object where each key is a company name and each value is an object containing at least:  
-- `"region"`: ISO-3166 alpha-2 code (e.g. `"US"`, `"SG"`)  
+- `"region"`: ISO-3166 alpha-2 code (e.g. `"US")  
 - `"ticker"`: stock symbol (for public companies)  
 - `"link"`: official website URL  
 
 Example Input (all companies in “US” region)  
 ```json
-{
-  "Acme Corp": { "region": "US", "ticker": "ACME",   "link": "https://www.acme.com" },
-  "TechSoft":  { "region": "US", "ticker": "TSFT",   "link": "https://www.techsoft.com" },
-  "RetailCo":  { "region": "US",               "link": "https://www.retailco.com" }
-}
+[
+    {
+    "name": "Microsoft",
+    "region": "us",
+    "ticker": "MSFT",
+    "link": "https://www.microsoft.com"
+    }
+]
 
 Task
 For each company retrieve and append the following metrics
@@ -108,26 +162,34 @@ If you cannot find a metric, set its value to null.
 Preserve the original region, ticker and link field
 Return strictly valid JSON
 Example output
-{
-  "Acme Corp": {
-    "region": "US",
-    "ticker": "ACME",
-    "link": "https://www.acme.com",
-    "annualRevenue": 120000000.0,
-    "netProfitMargin": 0.15,
-    "annualGrowthCAGR": 0.12,
-    "m&ACount": 3,
-    "ipoFilingsCount": 0,
-    "divestmentCount": 1,
-    "employeeCount": 15000,
-    "employeeGrowthRate": 0.08,
-    "relocationNewsCount": 4,
-    "spaceFootprint": 350000,
-    "leaseExpiryCount": 5,
-    "expansionNewsCount": 2,
-    "consolidationCount": 1
-  }
-}
+
+[
+    {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "financial_metrics": {
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+        },
+        "employee_metrics": {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+        },
+        "real_estate_metrics": {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+        }
+    }
+]
 
 """
 CLASSIFICATION_SKILL_PROMPT = """
@@ -138,44 +200,55 @@ A single JSON object where each key is a company name and each value is an objec
 - `"region"`
 - `"ticker"` (for public companies)
 - `"link"`
-- **Financial Metrics**:
-  - `"annualRevenue"`
-  - `"netProfitMargin"`
-  - `"annualGrowthCAGR"`
-  - `"mAndACount"`
-  - `"ipoFilingsCount"`
-  - `"divestmentCount"`
-- **Employee Metrics**:
-  - `"employeeCount"`
-  - `"employeeGrowthRate"`
-- **Real Estate Metrics**:
-  - `"spaceFootprint"`
-  - `"leaseExpiryCount"`
-  - `"expansionNewsCount"`
-  - `"consolidationCount"`
-  - `"relocationNewsCount"`
+FinancialMetrics:
+  annual_revenue: number
+  net_profit_margin: number
+  annual_growth_CAGR: number
+  mA_count: integer | null
+  ipo_filings_count: integer | null
+  divestments_count: integer | null
+
+EmployeeMetrics:
+  employee_count: integer | null
+  employee_growth_rate: number | null
+
+RealEstateMetrics:
+  space_footprint: integer | null
+  lease_expiry_count: integer | null
+  expansion_news_count: integer | null
+  consolidation_count: integer | null
+  relocation_news_count: integer | null
 
 Example Input  
 ```json
-{
-  "Acme Corp": {
-    "region": "US",
-    "ticker": "ACME",
-    "link": "https://www.acme.com",
-    "annualRevenue": 120000000.0,
-    "netProfitMargin": 0.15,
-    "annualGrowthCAGR": 0.12,
-    "mAndACount": 3,
-    "ipoFilingsCount": 0,
-    "divestmentCount": 1,
-    "employeeCount": 15000,
-    "employeeGrowthRate": 0.08,
-    "spaceFootprint": 350000,
-    "leaseExpiryCount": 5,
-    "expansionNewsCount": 2,
-    "consolidationCount": 1,
-    "relocationNewsCount": 4
-  }
+
+[
+    {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "financial_metrics": {
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+        },
+        "employee_metrics": {
+        "employee_count": 221000,
+        "employee_growth_rate": 0.03
+        },
+        "real_estate_metrics": {
+        "relocation_news_count": 5,
+        "space_footprint": 5000000,
+        "lease_expiry_count": 10,
+        "expansion_news_count": 8,
+        "consolidation_count": 2
+        }
+    }
+]
 
 Task
 Split the data into three arrays:
@@ -183,12 +256,40 @@ financialMetrics: objects containing company, plus all Financial Metrics.
 employeeMetrics: objects containing company, plus all Employee Metrics.
 realEstateMetrics: objects containing company, plus all Real Estate Metrics.
 Example output 
-{
-  "financialMetrics": [ /* array of {company, annualRevenue, …} */ ],
-  "employeeMetrics": [ /* array of {company, employeeCount, …} */ ],
-  "realEstateMetrics": [ /* array of {company, spaceFootprint, …} */ ],
-  "incompleteRecords": [ /* array of {company, missingFields} */ ]
-}
+[
+    {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "type": "financial",
+        "finance_metrics": object
+    }
+    
+]
+
+[
+    {
+        "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "type": "employee",
+        "employee": object
+    }
+    
+]
+
+[
+    {
+    "name": "Microsoft",
+        "region": "us",
+        "ticker": "MSFT",
+        "link": "https://www.microsoft.com",
+        "type": "real_estate",
+        "real_estate": object
+    }
+]
 
 """
 
@@ -215,26 +316,22 @@ A JSON object mapping each company name to its enriched profile, which includes:
 
 ### Example Input  
 ```json
-{
-  "Acme Corp": {
-    "annualRevenue": 120000000.0,
-    "netProfitMargin": 0.15,
-    "annualGrowthCAGR": 0.12,
-    "mAndACount": 3,
-    "ipoFilingsCount": 0,
-    "divestmentCount": 1,
-    "employeeCount": 15000,
-    "employeeGrowthRate": 0.08,
-    "spaceFootprint": 350000,
-    "leaseExpiryCount": 5,
-    "expansionNewsCount": 2,
-    "consolidationCount": 1,
-    "relocationNewsCount": 4
-  },
-  "TechSoft": {
-    /* similar structure */
-  }
-}
+
+[
+    {
+    "financialMetrics": [
+        {
+        "name": "Microsoft",
+        "annual_revenue": 168000000000.0,
+        "net_profit_margin": 0.31,
+        "annual_growth_CAGR": 0.12,
+        "mA_count": 2,
+        "ipo_filings_count": 0,
+        "divestments_count": 0
+        }
+    }
+]
+
 Task
 All companies in the input will belong in the same region, you will give them relative scoring based on the other companies in the same region.
 Compute the 5th percentile (P₅) and 95th percentile (P₉₅) for each metric across all input companies.
