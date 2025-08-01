@@ -1,15 +1,21 @@
+import os
 from pydantic import BaseModel
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
+from dotenv import load_dotenv
 
 app = FastAPI()
+load_dotenv()
+
 
 origins = [
     "http://localhost:5173", 
 ]
+
+DB_CONNECTION_URL = os.getenv("DATABASE_URL")
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,15 +40,22 @@ class FormPayloadType(BaseModel):
     region: str
     country: str
 
+class CompanyPayloadType(BaseModel):
+    company_name: str
+
 @app.get("/")
 def get_root_data():
     return { 'Welcome to Market Scanner Backend!' }
 
-@app.post('/api/scanner-chat')
+@app.get('/api/scanner-chat')
 def post_chat_data(chat_payload: ChatPayloadType):
     content = chat_payload.content
 
-@app.post("/api/scanner-form")
+@app.get("/api/scanner-form")
 def post_form_data(form_payload: FormPayloadType):
     industry, region, country = form_payload.industry, form_payload.region, form_payload.country
 
+@app.get("/api/dashboard/company-name")
+def post_company_data(company_payload: CompanyPayloadType):
+    company_name = company_payload.company_name
+    

@@ -1,5 +1,6 @@
 import os
 import asyncio
+from main import DB_CONNECTION_URL
 
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
@@ -15,6 +16,8 @@ from backend.app.skills.overall_ranking_skill import OverallRankingSkill
 from backend.app.skills.rationale_skill import RationaleSkill
 from backend.app.skills.storage_skill import StorageSkill
 from backend.app.skills.vectorize_skill import VectorizeSkill
+
+from backend.app.models.company_models import BaseScannerList
 
 # 1. Initialize Semantic Kernel with Azure OpenAI 
 kernel = Kernel()
@@ -34,7 +37,7 @@ scoring_skill = ScoringSkill()
 expansion_eval_skill = ExpansionEvalSkill()
 overall_ranking_skill = OverallRankingSkill()
 rationale_skill = RationaleSkill()
-storage_skill = StorageSkill()
+storage_skill = StorageSkill(DB_CONNECTION_URL)
 # vectorize_skill = VectorizeSkill()
 
 # 2. Import each agent as a Semantic Kernel skill
@@ -54,11 +57,11 @@ def shard_array(arr, size):
     return [arr[i : i + size] for i in range(0, len(arr), size)]
 
 
-async def process_shard(shard):
+async def process_shard(shard: BaseScannerList):
     # Enrich
     enriched_ctx = await kernel.invoke(
-        {"companies": shard},
         ingestion_skill.agent_function,
+        shard,
     )
     enriched = enriched_ctx.result
 

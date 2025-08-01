@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from overall_ranking_model import OverallRankedCompany
 
 class Rationale(OverallRankedCompany):
-    rationale: Optional[str] = Field(..., description="Rationale for the classification and ranking decisions made")
+    rationale: Optional[str] = Field(None, description="Rationale for the classification and ranking decisions made")
 
 # output from rationale agent
 class RationaleList(BaseModel):

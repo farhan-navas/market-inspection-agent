@@ -1,12 +1,14 @@
-import asyncio
+import json
 
 from semantic_kernel.functions import kernel_function
-from typing import List
+from main import project, model
+
 import backend.app.descriptions as descriptions
-from main import project
+import backend.app.prompts as prompts
 
 from app.models.region_split_model import RegionSplitList
 from app.models.ingested_models import IngestedList
+from azure.ai.agents.models import AgentThreadCreationOptions, ThreadMessageOptions, MessageRole, BingGroundingTool
 
 class IngestionSkill:
     def __init__(self):
@@ -16,28 +18,43 @@ class IngestionSkill:
             name="ingest_companies", 
             description=descriptions.INGESTION_SKILL_DESCRIPTION
     )
+    async def agent_function(self, company_information_list: RegionSplitList) -> IngestedList:       
+        agent_id = "fetch_companies"
+        bing_connection_id = "ba8921d52eda4f1181179f811192358b"
 
-    async def ingest_companies(self, company_information_list: RegionSplitList) -> IngestedList:       
-        try:
-            # Create a list to hold the ingested companies
-            ingested_companies = []
+        bing = BingGroundingTool(connection_id=bing_connection_id)
 
-            # Iterate through each company in the provided list
-            for company in company_information_list.companies:
-                # Create an entity for each company
-                entity = self.project.entities.create(
-                    entity_type="company",
-                    data={
-                        "name": company.name,
-                        "region": company.region,
-                        "ticker": company.ticker,
-                        "link": company.link
-                    }
-                )
-                ingested_companies.append(entity)
+        agent = self.project.agents.create_agent(
+            model=model,
+            name="BaseScannerAgent",
+            instructions=prompts.BASE_SCANNER_SKILL_PROMPT,
+            tools=bing.definitions,
+        )
 
-            # Return the list of ingested companies
-            return IngestedList(companies=ingested_companies).model_dump()
-        except Exception as e:
-            print(f"Error ingesting companies: {e}")
-            return IngestedList(companies=[]).model_dump()                                         
+        print(f"agent has been successfully created with id: {agent.id}")
+
+        thread_run = self.project.agents.create_thread_and_process_run(
+            agent_id=agent_id,
+            thread=AgentThreadCreationOptions(
+                messages=[
+                        ThreadMessageOptions(
+                        role="user",
+                        content=json.dumps(company_information_list.model_dump())
+                    )
+                ]
+            ),
+            tool_choice="bing_grounding",
+        )
+
+        last_text = self.project.agents.messages.get_last_message_text_by_role(
+            thread_id=thread_run.thread_id,
+            role=MessageRole("assistant")
+        )
+        # last_text is a MessageTextContent
+        assistant_output = last_text.text.value if last_text else ""
+
+        self.project.agents.delete_agent(agent.id)
+
+        # 5) Parse the concatenated JSON into your Pydantic model
+        return IngestedList.model_validate(assistant_output)
+                                                                                  

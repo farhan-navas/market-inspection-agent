@@ -38,3 +38,4 @@ uv.lock
 # Operating System specific ignores
 .DS_Store
 Thumbs.db
+.env
