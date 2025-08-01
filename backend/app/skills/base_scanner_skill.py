@@ -14,7 +14,7 @@ class BaseScannerSkill:
             name="fetch_companies", 
             description=descriptions.BASE_SCANNER_SKILL_DESCRIPTION
     )
-    async def fetch_companies(self, industry: str, region: Optional[str], country: Optional[str]) -> BaseScannerList:
+    async def agent_function(self, industry: str, region: Optional[str], country: Optional[str]) -> BaseScannerList:
 
         # Fetch companies based on industry, region, and country
         filters = {}
@@ -33,22 +33,21 @@ class BaseScannerSkill:
 
             company_list = [
                 CompanyInformation(
-                    id=entity.id,
                     name=entity.name,
-                    industry=entity.industry,
                     region=entity.region,
-                    country=entity.country
+                    ticker=entity.ticker,
+                    link=entity.link
                 ) for entity in entities
             ]
 
-            scanner_list = BaseScanner(
+            scanner_list = BaseScannerList(
                 companies=company_list
             )
 
-            return scanner_list.dict()
+            return scanner_list.model_dump()
         except Exception as e:
             print(f"Error fetching companies: {e}")
-            return BaseScanner(companies=[]).dict()
+            return BaseScannerList(companies=[]).model_dump()
         
         
 
