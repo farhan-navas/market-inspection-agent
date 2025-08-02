@@ -1,13 +1,14 @@
 import json
 
 from semantic_kernel.functions import kernel_function
-from main import project, model
-
+from app.app_config import model
 import app.descriptions as descriptions
 import app.prompts as prompts
 
-from app.models.ingested_models import IngestedList
-from app.models.classification_models import ClassifiedMetricsList
+from app.orchestrator.scanner_orchestrator import project
+
+from app.models.ingested_model import IngestedList
+from app.models.classification_model import ClassifiedMetricsList
 
 from azure.ai.agents.models import AgentThreadCreationOptions, ThreadMessageOptions, MessageRole, BingGroundingTool
 

@@ -1,6 +1,6 @@
 from typing import List, Union
 from pydantic import BaseModel, Field
-from classification_models import FinancialClassifiedCompany, EmployeeClassifiedCompany, RealEstateClassifiedCompany
+from app.models.classification_model import FinancialClassifiedCompany, EmployeeClassifiedCompany, RealEstateClassifiedCompany
 
 class CompanyMetricRanking(BaseModel):
     company: Union[

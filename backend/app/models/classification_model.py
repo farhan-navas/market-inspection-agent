@@ -1,6 +1,7 @@
 from typing import List, Literal
 from pydantic import BaseModel, Field
-from ingested_models import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
+
+from app.models.ingested_model import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
 from app.models.company_model import CompanyInformation
 
 class FinancialClassifiedCompany(CompanyInformation):

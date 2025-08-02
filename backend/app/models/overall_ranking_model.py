@@ -1,6 +1,7 @@
 from typing import List
 from pydantic import BaseModel, Field
-from merge_model import MergedCompany
+
+from app.models.merge_model import MergedCompany
 
 class OverallRankedCompany(MergedCompany):
     total_score: float = Field(..., description="Total score calculated based on various metrics and signals")

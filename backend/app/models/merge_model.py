@@ -1,7 +1,8 @@
-from typing import Optional, List
+from typing import List
 from pydantic import BaseModel, Field
-from expansion_eval_model import ExpansionEvalCompany
-from ingested_models import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
+
+from app.models.expansion_eval_model import ExpansionEvalCompany
+from app.models.ingested_model import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
 
 class MergedCompany(ExpansionEvalCompany):
     finance_metrics: FinancialMetrics = Field(

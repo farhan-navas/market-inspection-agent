@@ -1,11 +1,20 @@
 import os
 import asyncio
-from typing import List, Type, TypeVar
-from main import DB_CONNECTION_URL
+from typing import List, Type, TypeVar, cast
+from pydantic import BaseModel
+from app.app_config import DB_CONNECTION_URL
 
 from semantic_kernel import Kernel
 from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
+
+from azure.identity import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient
+
+project = AIProjectClient(
+    endpoint="https://hackathon-group4-resource.services.ai.azure.com/api/projects/hackathon-group4",
+    credential=DefaultAzureCredential()
+)
 
 from app.skills.base_scanner_skill import BaseScannerSkill
 from app.skills.region_split_skill import RegionSplitSkill 
@@ -20,7 +29,12 @@ from app.skills.storage_skill import StorageSkill
 
 from app.models.company_model import BaseScannerList
 from app.models.region_split_model import RegionSplitList
+from app.models.ingested_model import IngestedList
+from app.models.classification_model import ClassifiedMetricsList 
 from app.models.scoring_model import MetricRankingList
+from app.models.expansion_eval_model import ExpansionEvalCompanyList 
+from app.models.overall_ranking_model import OverallRankingList
+from app.models.rationale_model import RationaleList
 
 from app.exceptions.plugin_invocation_exception import PluginInvocationError
 
@@ -50,8 +64,8 @@ scanner_skill = kernel.add_plugin(scanner_skill, "Scanner")
 region_split_skill = kernel.add_plugin(region_split_skill, "Region Splitter")
 ingsestion_skill = kernel.add_plugin(ingestion_skill, "Ingestion")
 classification_skill = kernel.add_plugin(classification_skill, "Classify")
-ranking_skill = kernel.add_plugin(scoring_skill, "Scoring")
-signal_skill = kernel.add_plugin(expansion_eval_skill, "Signal")
+scoring_skill = kernel.add_plugin(scoring_skill, "Scoring")
+expansion_eval_skill = kernel.add_plugin(expansion_eval_skill, "Expansion Evaluation")
 overall_ranking_skill = kernel.add_plugin(overall_ranking_skill, "Overall Ranking")
 rationale_skill = kernel.add_plugin(rationale_skill, "Rationale")
 storage_skill = kernel.add_plugin(storage_skill, "Storage")
@@ -79,22 +93,36 @@ async def invoke_kernel_plugin(plugin_name: str, function_name: str, return_type
     if res is None or not hasattr(res, "value"):
         raise PluginInvocationError(plugin_name, function_name, "No valid data returned!")
 
-    return res.value # type: ignore
+    raw_return_value = res.value
 
-async def process_shard(shard: RegionSplitList) -> MetricRankingList:
-    # Enrich
-    ingested_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies",  KernelArguments(company_information_list=shard))
+    # if the return type is a Pydantic model, validate it
+    if issubclass(return_type, BaseModel):
+        try:
+            return return_type.model_validate(raw_return_value)
+        except Exception as e:
+            raise PluginInvocationError(
+                plugin_name,
+                function_name,
+                f"Returned value does not match expected model {return_type.__name__}: {e}"
+            )
 
-    # Region Split
-    region_split_ctx = await invoke_kernel_plugin("Region Splitter", "region_split_companies", KernelArguments(company_information_list=ingested_ctx))
+    # if it's not a Pydantic model (rare case), just trust the type hint
+    return cast(T, raw_return_value)
 
-    # Classify
-    classified_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies", KernelArguments(company_information_list=region_split_ctx))
+async def process_shard(shard: RegionSplitList) -> ExpansionEvalCompanyList:
+    # enrich
+    ingested_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies", IngestedList, KernelArguments(company_information_list=shard))
 
-    # Signal detection
-    scored_ctx = await invoke_kernel_plugin("Scoring", "score_companies", KernelArguments(company_information_list=classified_ctx))
+    # classify
+    classified_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies", ClassifiedMetricsList, KernelArguments(company_information_list=ingested_ctx))
+
+    # score
+    scored_ctx = await invoke_kernel_plugin("Scoring", "score_companies", MetricRankingList, KernelArguments(company_information_list=classified_ctx))
+
+    # evaluaute expansion
+    expansion_eval_ctx = await invoke_kernel_plugin("Expansion Evalutation", "evaluation_expansion_companies", ExpansionEvalCompanyList, KernelArguments(company_information_list=scored_ctx))
     
-    return scored_ctx
+    return expansion_eval_ctx
 
 
 async def run_scan(opts: dict):
@@ -109,65 +137,67 @@ async def run_scan(opts: dict):
       7. Persist
     """
     # 1) Fetch raw list
-    raw_ctx: BaseScannerList = await invoke_kernel_plugin("Scanner", "fetch_companies")
+    raw_ctx: BaseScannerList = await invoke_kernel_plugin("Scanner", "fetch_companies", BaseScannerList)
 
     # 2) Shard raw context based on safe(?) batch size
     region_batch_size = 5000
     region_shards = shard_array(raw_ctx, region_batch_size)
 
     # 3) Get full region split batch list of list, then concat them (due to .gather) 
-    region_split_batches_list: List[RegionSplitList] = await asyncio.gather(*[
-        invoke_kernel_plugin[RegionSplitList]("Region Split", "region_split_companies", KernelArguments(company_information_list=shard)) 
+    region_split_batches_list = await asyncio.gather(*[
+        invoke_kernel_plugin("Region Split", "region_split_companies", RegionSplitList ,KernelArguments(company_information_list=shard)) 
             for shard in region_shards
     ])
 
-    region_split_batches: RegionSplitList = [
-        item for batch in region_split_batches_list for item in batch
-    ]
+    region_split_batches = RegionSplitList(
+        companies=[
+            company
+            for batch in region_split_batches_list
+            for company in batch.companies
+        ]
+    )
 
-    # 2) Shard based on safe batch size (tune!!)
+    # 4) Shard based on safe batch size (tune!!)
     batch_size = 1000
-    shards = shard_array(region_split_batches, batch_size)
+    shards: List[RegionSplitList] = shard_array(region_split_batches, batch_size)
 
-    # 3) Parallel processing of shards
-    scored_batches = await asyncio.gather(*[
+    # 5) Parallel processing of shards
+    scored_batches_list = await asyncio.gather(*[
         process_shard(shard) for shard in shards
     ])
 
-    signaled_all = [c for batch in signaled_batches for c in batch]
+    scored_batches = ExpansionEvalCompanyList(
+        companies=[
+            company
+            for batch in scored_batches_list
+            for company in batch.companies
+        ]
+    ) 
 
     # 4) Ranking
-    rank_ctx = await kernel.run_async(
-        {"companies": signaled_all},
-        ranking_skill.RankingAgent
-    )
-    ranked = rank_ctx.result
+    rank_ctx = await invoke_kernel_plugin("Overall Ranking", "rank companies", OverallRankingList, KernelArguments(company_information_list=scored_batches))
 
     # 5) Take top 500
-    top_500 = ranked[:500]
+    top_500 = OverallRankingList(companies=rank_ctx.companies[:500])
 
     # 6) Generate rationales in smaller batches
     rationale_batch_size = 50
     rationale_shards = shard_array(top_500, rationale_batch_size)
-    explained = []
-    for batch in rationale_shards:
-        rat_ctx = await kernel.run_async(
-            {"companies": batch},
-            rationale_skill.RationaleAgent
-        )
-        explained.extend(rat_ctx.result)
 
-    # 7) Persist to storage
-    await kernel.run_async(
-        {"records": explained},
-        storage_skill.StorageAgent
+    explained_companies_list = await asyncio.gather(*[
+        invoke_kernel_plugin("Rationale", "rationale_companies", RationaleList, KernelArguments(company_information_list=shard))
+            for shard in rationale_shards
+    ])
+
+    explained_companies = RationaleList(
+        companies=[
+            company
+            for batch in explained_companies_list
+            for company in batch.companies
+        ]
     )
 
-    return explained
+    # 7) Persist to storage
+    await invoke_kernel_plugin("Storage", "store_companies", dict, KernelArguments(company_information_list=explained_companies_list))
 
-
-if __name__ == "__main__":
-    # Example invocation
-    opts = {"industry": None, "country": None, "region": None}
-    results = asyncio.run(run_scan(opts))
-    print(f"Persisted {len(results)} company records.")
+    return explained_companies

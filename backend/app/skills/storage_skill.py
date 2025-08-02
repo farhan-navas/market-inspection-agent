@@ -1,11 +1,11 @@
 import json
 import asyncpg
 from semantic_kernel.functions import kernel_function
-from typing import List, Optional
-from main import project, model, DB_CONNECTION_URL
+from typing import Optional
 
 import app.descriptions as descriptions
-import app.prompts as prompts
+
+from app.orchestrator.scanner_orchestrator import project
 
 from app.models.rationale_model import RationaleList
 
@@ -49,7 +49,7 @@ class StorageSkill:
                     if isinstance(item.real_estate, dict):
                         signals.update(item.real_estate)
 
-                    rationale = item.rationale if (item is not None or not hasattr(item, "rationale")) else ''
+                    rationale = item.rationale
 
                     # 3) Upsert: insert or update on conflict (e.g. same ticker+region)
                     await conn.execute(

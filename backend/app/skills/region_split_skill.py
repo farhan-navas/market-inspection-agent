@@ -1,9 +1,10 @@
 import json 
 from semantic_kernel.functions import kernel_function
-from main import project, model
-
+from app.app_config import model
 import app.descriptions as descriptions
 import app.prompts as prompts
+
+from app.orchestrator.scanner_orchestrator import project
 
 from app.models.company_model import BaseScannerList
 from app.models.region_split_model import RegionSplitList

@@ -1,11 +1,12 @@
 import json
 from semantic_kernel.functions import kernel_function
-from main import project, model
-
+from app.app_config import model
 import app.descriptions as descriptions
 import app.prompts as prompts
 
-from app.models.classification_models import ClassifiedMetricsList
+from app.orchestrator.scanner_orchestrator import project
+
+from app.models.classification_model import ClassifiedMetricsList
 from app.models.scoring_model import MetricRankingList
 
 
@@ -15,7 +16,7 @@ class ScoringSkill:
     def __init__(self):
         self.project = project
 
-    @kernel_function(name="scoring_companies", description=descriptions.SCORING_SKILL_DESCRIPITION)
+    @kernel_function(name="score_companies", description=descriptions.SCORING_SKILL_DESCRIPITION)
     async def agent_function(self, company_information_list: ClassifiedMetricsList) -> MetricRankingList:
         agent_id = "fetch_companies"
         bing_connection_id = "ba8921d52eda4f1181179f811192358b"

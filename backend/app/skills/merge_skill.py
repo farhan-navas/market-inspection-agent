@@ -1,9 +1,10 @@
 import json
 from semantic_kernel.functions import kernel_function
-from main import project, model
-
+from app.app_config import model 
 import app.descriptions as descriptions
-import app.prompts as prompts 
+import app.prompts as prompts
+
+from app.orchestrator.scanner_orchestrator import project
 
 from app.models.overall_ranking_model import OverallRankingList
 from app.models.merge_model import MergedCompanyList

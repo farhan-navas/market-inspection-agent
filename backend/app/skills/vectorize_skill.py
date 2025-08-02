@@ -2,7 +2,9 @@
 # from semantic_kernel.functions import kernel_function
 # from typing import List
 # import app.descriptions as descriptions
-# from main import project
+# from app.app_config import model
+
+# from app.orchestrator.scanner_orchestrator import project
 
 # from app.models.rationale_model import RationaleList
 # from app.models.vectorization_model import VectorEmbeddedCompanyList

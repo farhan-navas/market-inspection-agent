@@ -1,6 +1,7 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from scoring_model import CompanyMetricRanking
+
+from app.models.scoring_model import CompanyMetricRanking
 
 class ExpansionSignal(BaseModel):
     expansion_region: str = Field(..., description="Region where the company is expanding")

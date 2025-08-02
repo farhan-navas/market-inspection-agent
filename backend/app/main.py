@@ -1,21 +1,14 @@
-import os
 from pydantic import BaseModel
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from azure.identity import DefaultAzureCredential
-from azure.ai.projects import AIProjectClient
-from dotenv import load_dotenv
+from app.orchestrator.scanner_orchestrator import run_scan
 
 app = FastAPI()
-load_dotenv()
-
 
 origins = [
     "http://localhost:5173", 
 ]
-
-DB_CONNECTION_URL = os.getenv("DATABASE_URL")
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,13 +16,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
-
-model="o4-mini"
-
-project = AIProjectClient(
-    endpoint="https://hackathon-group4-resource.services.ai.azure.com/api/projects/hackathon-group4",
-    credential=DefaultAzureCredential()
 )
 
 class ChatPayloadType(BaseModel):
@@ -46,6 +32,17 @@ class CompanyPayloadType(BaseModel):
 @app.get("/")
 def get_root_data():
     return { 'Welcome to Market Scanner Backend!' }
+
+@app.get("/trial")
+async def fetch_data():
+    opts = {"industry": "Healthcare", "country": None, "region": None} # hardcoded trial
+
+    res = await run_scan(opts)
+    return { 
+        "message": 'Welcome to Market Scanner Backend!', 
+        "companies": res.companies, 
+        "res": f"Persisted {len(res.companies)} company records." 
+    }
 
 @app.get('/api/scanner-chat')
 def post_chat_data(chat_payload: ChatPayloadType):

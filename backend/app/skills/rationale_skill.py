@@ -1,9 +1,10 @@
 import json
 from semantic_kernel.functions import kernel_function
-from main import project, model
-
+from app.app_config import model
 import app.descriptions as descriptions
-import app.prompts as prompts 
+import app.prompts as prompts
+
+from app.orchestrator.scanner_orchestrator import project
 
 from app.models.merge_model import MergedCompanyList
 from app.models.rationale_model import RationaleList
@@ -16,7 +17,7 @@ class RationaleSkill:
 
     @kernel_function(name="rationale_companies", description=descriptions.RATIONALE_SKILL_DESCRIPTION)
     async def agent_function(self, company_information_list: MergedCompanyList) -> RationaleList:
-        agent_id = "fetch_companies"
+        agent_id = "rationale_companies"
         bing_connection_id = "ba8921d52eda4f1181179f811192358b"
 
         bing = BingGroundingTool(connection_id=bing_connection_id)
