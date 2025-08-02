@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import App from "./pages/App";
 import DashboardPage from "./pages/Dashboard";
-import ErrorPage from "./components/ErroBoundary";
+import ErrorPage from "./components/ErrorBoundary";
 import IndustryRegionCountryForm from "./components/IndustryRegionCountryForm";
 
 export const router = createBrowserRouter([
@@ -17,8 +17,7 @@ export const router = createBrowserRouter([
   {
     path: "/form",
     element: <IndustryRegionCountryForm />,
-  
-  }
+  },
 
   // temp page structure that i think we will use?
   //   {

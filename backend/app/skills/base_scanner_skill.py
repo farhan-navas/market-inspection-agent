@@ -5,7 +5,7 @@ from main import project, model
 import backend.app.descriptions as descriptions
 import backend.app.prompts as prompts
 
-from app.models.company_models import CompanyInformation, BaseScannerList
+from app.models.company_models import BaseScannerList
 
 from azure.ai.agents.models import AgentThreadCreationOptions, ThreadMessageOptions, MessageRole, BingGroundingTool
 

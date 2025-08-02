@@ -1,6 +1,5 @@
 import json 
 from semantic_kernel.functions import kernel_function
-from typing import List
 from main import project, model
 
 import backend.app.descriptions as descriptions
@@ -14,7 +13,10 @@ class RegionSplitSkill:
     def __init__(self):
         self.project = project
 
-    @kernel_function(name="region_split_companies", description=descriptions.INGESTION_SKILL_DESCRIPTION)
+    @kernel_function(
+            name="region_split_companies", 
+            description=descriptions.REGION_SPLIT_SKILL_DESCRIPTION
+    )
     async def agent_function(self, company_information_list: BaseScannerList) -> RegionSplitList:
         agent_id = "region_split_companies"
 

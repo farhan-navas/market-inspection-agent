@@ -60,22 +60,23 @@ def shard_array(arr, size):
 async def process_shard(shard: BaseScannerList):
     # Enrich
     enriched_ctx = await kernel.invoke(
-        ingestion_skill.agent_function,
-        KernelArguments(companies=shard),
+        plugin_name="Ingestion",
+        function_name="ingest_companies",
+        arguments=KernelArguments(company_information_list=shard),
     )
     enriched = enriched_ctx.value if enriched_ctx is not None else ''
 
     # Region Split
-    clean_ctx = await kernel.invoke(
-        region_split_skill.agent_function,
-        KernelArguments(companies=enriched),
+    region_split_ctx = await kernel.invoke(
+        plugin_name="Region Splitter",
+        function_name="region_split_companies",
+        arguments=KernelArguments(company_information_list=enriched),
     )
-    cleaned = clean_ctx.result
+    region_split = region_split_ctx.value if region_split_ctx is not None else ''
 
     # Classify
-    classified_ctx = await kernel.run_async(
-        {"companies": cleaned},
-        classification_skill.ClassifyAgent
+    classified_ctx = await kernel.invoke(
+        plugin_name=""
     )
     classified = classified_ctx.result
 
@@ -91,7 +92,7 @@ async def run_scan(opts: dict):
     """
     Orchestrates a full scan:
       1. Fetch raw companies
-      2. Shard & parallel (Ingest → Normalize → Classify → Signal)
+      2. Shard & parallel (Ingest -> Normalize -> Classify -> Signal)
       3. Merge
       4. Rank
       5. Top 500
@@ -105,14 +106,22 @@ async def run_scan(opts: dict):
     )
     raw_companies = raw_ctx.result
 
+    region_batch_size = 5000
+    region_shards = shard_array(raw_companies, region_batch_size)
+
+    region_split_batches = await asyncio.gather(*[
+        process_shard(shard) for shard in region_shards
+    ])
+
     # 2) Shard based on safe batch size (tune as needed)
     batch_size = 1000
-    shards = shard_array(raw_companies, batch_size)
+    shards = shard_array(region_split_batches, batch_size)
 
     # 3) Parallel processing of shards
     signaled_batches = await asyncio.gather(*[
         process_shard(shard) for shard in shards
     ])
+
     signaled_all = [c for batch in signaled_batches for c in batch]
 
     # 4) Ranking
