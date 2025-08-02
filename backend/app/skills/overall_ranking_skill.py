@@ -1,13 +1,12 @@
 import json
 from semantic_kernel.functions import kernel_function
-from typing import List
 from main import project, model
 
-import backend.app.descriptions as descriptions
-import backend.app.prompts as prompts
+import app.descriptions as descriptions
+import app.prompts as prompts
 
-from backend.app.models.expansion_eval_model import ExpansionEvalCompanyList
-from backend.app.models.overall_ranking_model import OverallRankingList
+from app.models.expansion_eval_model import ExpansionEvalCompanyList
+from app.models.overall_ranking_model import OverallRankingList
 
 from azure.ai.agents.models import AgentThreadCreationOptions, ThreadMessageOptions, MessageRole
 

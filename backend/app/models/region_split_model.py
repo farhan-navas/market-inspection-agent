@@ -1,7 +1,7 @@
 from typing import List, Literal
 from pydantic import BaseModel, Field
 
-from company_models import CompanyInformation
+from app.models.company_model import CompanyInformation
 
 class AustraliaRegionSplit(CompanyInformation):
     region: Literal["aus"] = Field(

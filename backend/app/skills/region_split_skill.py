@@ -2,10 +2,10 @@ import json
 from semantic_kernel.functions import kernel_function
 from main import project, model
 
-import backend.app.descriptions as descriptions
-import backend.app.prompts as prompts
+import app.descriptions as descriptions
+import app.prompts as prompts
 
-from app.models.company_models import BaseScannerList
+from app.models.company_model import BaseScannerList
 from app.models.region_split_model import RegionSplitList
 from azure.ai.agents.models import AgentThreadCreationOptions, ThreadMessageOptions, MessageRole
 

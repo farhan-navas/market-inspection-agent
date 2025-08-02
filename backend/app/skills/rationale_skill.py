@@ -2,11 +2,11 @@ import json
 from semantic_kernel.functions import kernel_function
 from main import project, model
 
-import backend.app.descriptions as descriptions
-import backend.app.prompts as prompts 
+import app.descriptions as descriptions
+import app.prompts as prompts 
 
-from backend.app.models.merge_model import MergedCompanyList
-from backend.app.models.rationale_model import RationaleList
+from app.models.merge_model import MergedCompanyList
+from app.models.rationale_model import RationaleList
 
 from azure.ai.agents.models import AgentThreadCreationOptions, ThreadMessageOptions, MessageRole, BingGroundingTool
 

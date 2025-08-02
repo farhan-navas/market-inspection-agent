@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field
 
-from company_models import CompanyInformation
+from app.models.company_model import CompanyInformation
 
 class FinancialMetrics(BaseModel):
     annual_revenue: float = Field(..., description="Annual revenue of the company")

@@ -4,10 +4,10 @@ from semantic_kernel.functions import kernel_function
 from typing import List, Optional
 from main import project, model, DB_CONNECTION_URL
 
-import backend.app.descriptions as descriptions
-import backend.app.prompts as prompts
+import app.descriptions as descriptions
+import app.prompts as prompts
 
-from backend.app.models.rationale_model import RationaleList
+from app.models.rationale_model import RationaleList
 
 SQL_CREATE_TABLE = """
 CREATE TABLE company_rankings (

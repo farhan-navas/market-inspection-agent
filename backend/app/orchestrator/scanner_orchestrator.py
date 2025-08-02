@@ -1,23 +1,28 @@
 import os
 import asyncio
+from typing import List, Type, TypeVar
 from main import DB_CONNECTION_URL
 
 from semantic_kernel import Kernel
 from semantic_kernel.functions.kernel_arguments import KernelArguments
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 
-from backend.app.skills.base_scanner_skill import BaseScannerSkill
-from backend.app.skills.region_split_skill import RegionSplitSkill 
-from backend.app.skills.ingestion_skill import IngestionSkill
-from backend.app.skills.classification_skill import ClassificationSkill
-from backend.app.skills.scoring_skill import ScoringSkill
-from backend.app.skills.expansion_eval_skill import ExpansionEvalSkill
-from backend.app.skills.overall_ranking_skill import OverallRankingSkill
-from backend.app.skills.rationale_skill import RationaleSkill
-from backend.app.skills.storage_skill import StorageSkill
-# from backend.app.skills.vectorize_skill import VectorizeSkill
+from app.skills.base_scanner_skill import BaseScannerSkill
+from app.skills.region_split_skill import RegionSplitSkill 
+from app.skills.ingestion_skill import IngestionSkill
+from app.skills.classification_skill import ClassificationSkill
+from app.skills.scoring_skill import ScoringSkill
+from app.skills.expansion_eval_skill import ExpansionEvalSkill
+from app.skills.overall_ranking_skill import OverallRankingSkill
+from app.skills.rationale_skill import RationaleSkill
+from app.skills.storage_skill import StorageSkill
+# from app.skills.vectorize_skill import VectorizeSkill
 
-from backend.app.models.company_models import BaseScannerList
+from app.models.company_model import BaseScannerList
+from app.models.region_split_model import RegionSplitList
+from app.models.scoring_model import MetricRankingList
+
+from app.exceptions.plugin_invocation_exception import PluginInvocationError
 
 # 1. Initialize Semantic Kernel with Azure OpenAI 
 kernel = Kernel()
@@ -56,36 +61,40 @@ def shard_array(arr, size):
     """Split list into chunks of given size"""
     return [arr[i : i + size] for i in range(0, len(arr), size)]
 
+T = TypeVar("T")
 
-async def process_shard(shard: BaseScannerList):
+async def invoke_kernel_plugin(plugin_name: str, function_name: str, return_type: Type[T], *args: KernelArguments) -> T:
+    try:
+        # if kernel.invoke itself fails, that exception will be caught below
+        res = await kernel.invoke(
+            plugin_name=plugin_name,
+            function_name=function_name,
+            arguments=args[0]
+        )
+    except Exception as e:
+        # wrap any lower-level error in a more descriptive exception
+        raise PluginInvocationError(plugin_name, function_name, e.__str__(), e)
+
+    # if we get back None, or there's no .value, treat it as an error
+    if res is None or not hasattr(res, "value"):
+        raise PluginInvocationError(plugin_name, function_name, "No valid data returned!")
+
+    return res.value # type: ignore
+
+async def process_shard(shard: RegionSplitList) -> MetricRankingList:
     # Enrich
-    enriched_ctx = await kernel.invoke(
-        plugin_name="Ingestion",
-        function_name="ingest_companies",
-        arguments=KernelArguments(company_information_list=shard),
-    )
-    enriched = enriched_ctx.value if enriched_ctx is not None else ''
+    ingested_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies",  KernelArguments(company_information_list=shard))
 
     # Region Split
-    region_split_ctx = await kernel.invoke(
-        plugin_name="Region Splitter",
-        function_name="region_split_companies",
-        arguments=KernelArguments(company_information_list=enriched),
-    )
-    region_split = region_split_ctx.value if region_split_ctx is not None else ''
+    region_split_ctx = await invoke_kernel_plugin("Region Splitter", "region_split_companies", KernelArguments(company_information_list=ingested_ctx))
 
     # Classify
-    classified_ctx = await kernel.invoke(
-        plugin_name=""
-    )
-    classified = classified_ctx.result
+    classified_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies", KernelArguments(company_information_list=region_split_ctx))
 
     # Signal detection
-    signal_ctx = await kernel.run_async(
-        {"companies": classified},
-        signal_skill.SignalAgent
-    )
-    return signal_ctx.result
+    scored_ctx = await invoke_kernel_plugin("Scoring", "score_companies", KernelArguments(company_information_list=classified_ctx))
+    
+    return scored_ctx
 
 
 async def run_scan(opts: dict):
@@ -100,25 +109,28 @@ async def run_scan(opts: dict):
       7. Persist
     """
     # 1) Fetch raw list
-    raw_ctx = await kernel.run_async(
-        opts,
-        scanner_skill.agent_function
-    )
-    raw_companies = raw_ctx.result
+    raw_ctx: BaseScannerList = await invoke_kernel_plugin("Scanner", "fetch_companies")
 
+    # 2) Shard raw context based on safe(?) batch size
     region_batch_size = 5000
-    region_shards = shard_array(raw_companies, region_batch_size)
+    region_shards = shard_array(raw_ctx, region_batch_size)
 
-    region_split_batches = await asyncio.gather(*[
-        process_shard(shard) for shard in region_shards
+    # 3) Get full region split batch list of list, then concat them (due to .gather) 
+    region_split_batches_list: List[RegionSplitList] = await asyncio.gather(*[
+        invoke_kernel_plugin[RegionSplitList]("Region Split", "region_split_companies", KernelArguments(company_information_list=shard)) 
+            for shard in region_shards
     ])
 
-    # 2) Shard based on safe batch size (tune as needed)
+    region_split_batches: RegionSplitList = [
+        item for batch in region_split_batches_list for item in batch
+    ]
+
+    # 2) Shard based on safe batch size (tune!!)
     batch_size = 1000
     shards = shard_array(region_split_batches, batch_size)
 
     # 3) Parallel processing of shards
-    signaled_batches = await asyncio.gather(*[
+    scored_batches = await asyncio.gather(*[
         process_shard(shard) for shard in shards
     ])
 

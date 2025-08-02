@@ -2,8 +2,8 @@ import json
 from semantic_kernel.functions import kernel_function
 from main import project, model
 
-import backend.app.descriptions as descriptions
-import backend.app.prompts as prompts
+import app.descriptions as descriptions
+import app.prompts as prompts
 
 from app.models.classification_models import ClassifiedMetricsList
 from app.models.scoring_model import MetricRankingList

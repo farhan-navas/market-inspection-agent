@@ -1,7 +1,7 @@
 from typing import List, Literal
 from pydantic import BaseModel, Field
 from ingested_models import FinancialMetrics, EmployeeMetrics, RealEstateMetrics
-from company_models import CompanyInformation
+from app.models.company_model import CompanyInformation
 
 class FinancialClassifiedCompany(CompanyInformation):
     type: Literal["financial"] = Field(

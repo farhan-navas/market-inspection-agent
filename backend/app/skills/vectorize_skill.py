@@ -1,11 +1,11 @@
 # import asyncio
 # from semantic_kernel.functions import kernel_function
 # from typing import List
-# import backend.app.descriptions as descriptions
+# import app.descriptions as descriptions
 # from main import project
 
-# from backend.app.models.rationale_model import RationaleList
-# from backend.app.models.vectorization_model import VectorEmbeddedCompanyList
+# from app.models.rationale_model import RationaleList
+# from app.models.vectorization_model import VectorEmbeddedCompanyList
 
 # class VectorizeSkill:
 #     def __init__(self):
