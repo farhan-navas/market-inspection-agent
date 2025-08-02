@@ -3,7 +3,7 @@ import asyncpg
 from semantic_kernel.functions import kernel_function
 from typing import Optional
 
-import app.descriptions as descriptions
+import app.descriptions as DESCRIPTIONS
 
 from app.orchestrator.scanner_orchestrator import project
 
@@ -28,7 +28,7 @@ class StorageSkill:
         self.project = project
         self.DB_CONNECTION_URL = DB_CONNECTION_URL
 
-    @kernel_function(name="storage_companies", description=descriptions.STORAGE_SKILL_DESCRIPTION)
+    @kernel_function(name="storage_companies", description=DESCRIPTIONS.STORAGE_SKILL_DESCRIPTION)
     async def agent_function(self, company_information_list: RationaleList) -> str:
         conn = await asyncpg.connect(self.DB_CONNECTION_URL)
         try:

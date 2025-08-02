@@ -1,8 +1,8 @@
 import json
 from semantic_kernel.functions import kernel_function
-from app.app_config import model 
-import app.descriptions as descriptions
-import app.prompts as prompts
+from app.app_config import config 
+import app.descriptions as DESCRIPTIONS
+import app.prompts as PROMPTS
 
 from app.orchestrator.scanner_orchestrator import project
 
@@ -15,14 +15,14 @@ class OverallRankingSkill:
     def __init__(self):
         self.project = project
 
-    @kernel_function(name="merge_companies", description=descriptions.MERGE_SKILL_DESCRIPTION)
+    @kernel_function(name="merge_companies", description=DESCRIPTIONS.MERGE_SKILL_DESCRIPTION)
     async def agent_function(self, company_information_list: OverallRankingList) -> MergedCompanyList:
         agent_id = "rank_companies"
 
         agent = self.project.agents.create_agent(
-            model=model,
+            model=config.MODEL,
             name="BaseScannerAgent",
-            instructions=prompts.BASE_SCANNER_SKILL_PROMPT,
+            instructions=PROMPTS.BASE_SCANNER_SKILL_PROMPT,
         )
 
         print(f"agent has been successfully created with id: {agent.id}")

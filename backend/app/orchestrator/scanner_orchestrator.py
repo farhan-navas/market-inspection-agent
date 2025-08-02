@@ -2,7 +2,7 @@ import os
 import asyncio
 from typing import List, Type, TypeVar, cast
 from pydantic import BaseModel
-from app.app_config import DB_CONNECTION_URL
+from app.app_config import config
 
 from semantic_kernel import Kernel
 from semantic_kernel.functions.kernel_arguments import KernelArguments
@@ -56,7 +56,7 @@ scoring_skill = ScoringSkill()
 expansion_eval_skill = ExpansionEvalSkill()
 overall_ranking_skill = OverallRankingSkill()
 rationale_skill = RationaleSkill()
-storage_skill = StorageSkill(DB_CONNECTION_URL)
+storage_skill = StorageSkill(config.DB_CONNECTION_URL)
 # vectorize_skill = VectorizeSkill()
 
 # 2. Import each agent as a Semantic Kernel skill

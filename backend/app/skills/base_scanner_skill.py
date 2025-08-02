@@ -1,7 +1,7 @@
 from semantic_kernel.functions import kernel_function
-from app.app_config import model
-import app.descriptions as descriptions
-import app.prompts as prompts
+from app.app_config import config
+import app.descriptions as DESCRIPTIONS
+import app.prompts as PROMPTS
 
 from app.orchestrator.scanner_orchestrator import project
 
@@ -15,7 +15,7 @@ class BaseScannerSkill:
 
     @kernel_function(
             name="fetch_companies", 
-            description=descriptions.BASE_SCANNER_SKILL_DESCRIPTION
+            description=DESCRIPTIONS.BASE_SCANNER_SKILL_DESCRIPTION
     )
     async def agent_function(self, industry: str) -> BaseScannerList:
         agent_id = "fetch_companies"
@@ -24,9 +24,9 @@ class BaseScannerSkill:
         bing = BingGroundingTool(connection_id=bing_connection_id)
 
         agent = self.project.agents.create_agent(
-            model=model,
+            model=config.MODEL,
             name="BaseScannerAgent",
-            instructions=prompts.BASE_SCANNER_SKILL_PROMPT,
+            instructions=PROMPTS.BASE_SCANNER_SKILL_PROMPT,
             tools=bing.definitions,
         )
 

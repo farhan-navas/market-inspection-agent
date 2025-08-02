@@ -2,7 +2,7 @@
 # from semantic_kernel.functions import kernel_function
 # from typing import List
 # import app.descriptions as descriptions
-# from app.app_config import model
+# from app.app_config import config
 
 # from app.orchestrator.scanner_orchestrator import project
 
