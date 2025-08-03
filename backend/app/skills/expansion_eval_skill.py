@@ -18,7 +18,7 @@ class ExpansionEvalSkill:
     @kernel_function(name="evaluate_expansion_companies", description=DESCRIPTIONS.EXPANSION_EVALUATION_SKILL_DESCRIPTION)
     async def agent_function(self, company_information_list: MetricRankingList) -> ExpansionEvalCompanyList:
         agent_id = "fetch_companies"
-        bing_connection_id = "ba8921d52eda4f1181179f811192358b"
+        bing_connection_id = config.BING_CONNECTION_ID
 
         bing = BingGroundingTool(connection_id=bing_connection_id)
 

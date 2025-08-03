@@ -4,17 +4,12 @@ from typing import List, Type, TypeVar, cast
 from pydantic import BaseModel
 from app.app_config import config
 
-from semantic_kernel import Kernel
 from semantic_kernel.functions.kernel_arguments import KernelArguments
-from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 
-from azure.identity import DefaultAzureCredential
-from azure.ai.projects import AIProjectClient
+from app.app_config import config
 
-project = AIProjectClient(
-    endpoint="https://hackathon-group4-resource.services.ai.azure.com/api/projects/hackathon-group4",
-    credential=DefaultAzureCredential()
-)
+project = config.project
+kernel = config.kernel
 
 from app.skills.base_scanner_skill import BaseScannerSkill
 from app.skills.region_split_skill import RegionSplitSkill 
@@ -38,16 +33,6 @@ from app.models.rationale_model import RationaleList
 
 from app.exceptions.plugin_invocation_exception import PluginInvocationError
 
-# 1. Initialize Semantic Kernel with Azure OpenAI 
-kernel = Kernel()
-
-kernel.add_service(
-    AzureChatCompletion(
-        api_key=os.getenv("AZURE_OPENAI_KEY"),
-        endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        deployment_name="o4-mini",
-    )
-) 
 scanner_skill = BaseScannerSkill()
 region_split_skill = RegionSplitSkill()
 ingestion_skill = IngestionSkill()
@@ -72,7 +57,7 @@ storage_skill = kernel.add_plugin(storage_skill, "Storage")
 # vectorize_skill = kernel.add_plugin(vectorize_skill, "Vectorize")
 
 def shard_array(arr, size):
-    """Split list into chunks of given size"""
+    # Split list into chunks of given size
     return [arr[i : i + size] for i in range(0, len(arr), size)]
 
 T = TypeVar("T")
@@ -136,8 +121,9 @@ async def run_scan(opts: dict):
       6. Generate rationales in batches
       7. Persist
     """
+
     # 1) Fetch raw list
-    raw_ctx: BaseScannerList = await invoke_kernel_plugin("Scanner", "fetch_companies", BaseScannerList)
+    raw_ctx: BaseScannerList = await invoke_kernel_plugin("Scanner", "fetch_companies", BaseScannerList, KernelArguments(opts))
 
     # 2) Shard raw context based on safe(?) batch size
     region_batch_size = 5000
@@ -174,13 +160,13 @@ async def run_scan(opts: dict):
         ]
     ) 
 
-    # 4) Ranking
+    # 6) Ranking
     rank_ctx = await invoke_kernel_plugin("Overall Ranking", "rank companies", OverallRankingList, KernelArguments(company_information_list=scored_batches))
 
-    # 5) Take top 500
+    # 7) Take top 500
     top_500 = OverallRankingList(companies=rank_ctx.companies[:500])
 
-    # 6) Generate rationales in smaller batches
+    # 8) Generate rationales in smaller batches
     rationale_batch_size = 50
     rationale_shards = shard_array(top_500, rationale_batch_size)
 
@@ -197,7 +183,8 @@ async def run_scan(opts: dict):
         ]
     )
 
-    # 7) Persist to storage
+    # 9) Persist to storage
     await invoke_kernel_plugin("Storage", "store_companies", dict, KernelArguments(company_information_list=explained_companies_list))
 
+    # 10) Return explained companies to backend for validation
     return explained_companies

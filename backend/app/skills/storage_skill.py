@@ -1,4 +1,3 @@
-import json
 import asyncpg
 from semantic_kernel.functions import kernel_function
 from typing import Optional

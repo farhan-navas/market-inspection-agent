@@ -1,3 +1,4 @@
+from typing import Optional
 from semantic_kernel.functions import kernel_function
 from app.app_config import config
 import app.descriptions as DESCRIPTIONS
@@ -17,9 +18,9 @@ class BaseScannerSkill:
             name="fetch_companies", 
             description=DESCRIPTIONS.BASE_SCANNER_SKILL_DESCRIPTION
     )
-    async def agent_function(self, industry: str) -> BaseScannerList:
+    async def agent_function(self, industry: str, country: Optional[str] = None, region: Optional[str] = None) -> BaseScannerList:
         agent_id = "fetch_companies"
-        bing_connection_id = "ba8921d52eda4f1181179f811192358b"
+        bing_connection_id = config.BING_CONNECTION_ID
 
         bing = BingGroundingTool(connection_id=bing_connection_id)
 

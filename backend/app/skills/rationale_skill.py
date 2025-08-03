@@ -18,7 +18,7 @@ class RationaleSkill:
     @kernel_function(name="rationale_companies", description=DESCRIPTIONS.RATIONALE_SKILL_DESCRIPTION)
     async def agent_function(self, company_information_list: MergedCompanyList) -> RationaleList:
         agent_id = "rationale_companies"
-        bing_connection_id = "ba8921d52eda4f1181179f811192358b"
+        bing_connection_id = config.BING_CONNECTION_ID
 
         bing = BingGroundingTool(connection_id=bing_connection_id)
 

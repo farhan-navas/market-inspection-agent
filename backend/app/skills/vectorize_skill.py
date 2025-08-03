@@ -14,7 +14,7 @@
 #         self.project = project
 
 
-#     @kernel_function(name="region_split_companies", description=descriptions.INGESTION_SKILL_DESCRIPTION)
+#     @kernel_function(name="vectorize_companies", description=descriptions.VECTORIZE_SKILL_DESCRIPTION)
 #     async def classify_companies(self, company_information_tool: RationaleList) -> VectorEmbeddedCompanyList:
 #         res: VectorEmbeddedCompanyList = [{}] 
 

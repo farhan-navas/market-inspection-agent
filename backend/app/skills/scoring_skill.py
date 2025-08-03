@@ -19,7 +19,7 @@ class ScoringSkill:
     @kernel_function(name="score_companies", description=DESCRIPTIONS.SCORING_SKILL_DESCRIPITION)
     async def agent_function(self, company_information_list: ClassifiedMetricsList) -> MetricRankingList:
         agent_id = "fetch_companies"
-        bing_connection_id = "ba8921d52eda4f1181179f811192358b"
+        bing_connection_id = config.BING_CONNECTION_ID
 
         bing = BingGroundingTool(connection_id=bing_connection_id)
 

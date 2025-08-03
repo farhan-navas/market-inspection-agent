@@ -21,7 +21,7 @@ class IngestionSkill:
     )
     async def agent_function(self, company_information_list: RegionSplitList) -> IngestedList:       
         agent_id = "ingest_companies"
-        bing_connection_id = "ba8921d52eda4f1181179f811192358b"
+        bing_connection_id = config.BING_CONNECTION_ID
 
         bing = BingGroundingTool(connection_id=bing_connection_id)
 
