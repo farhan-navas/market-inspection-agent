@@ -17,7 +17,7 @@ class AppConfig:
         db_url = os.getenv("DATABASE_URL")
         if not db_url:
             raise ValueError("DATABASE_URL environment variable is required.")
-        self.DB_CONNECTION_URL: str = db_url
+        self.DATABASE_URL: str = db_url
 
         bing_id = os.getenv("BING_CONNECTION_ID")
         if not bing_id:
@@ -30,7 +30,7 @@ class AppConfig:
         self.AZURE_AI_AGENT_ENDPOINT = agent_endpoint
 
         openai_key = os.getenv("AZURE_OPENAI_KEY")
-        if not agent_endpoint:
+        if not openai_key:
             raise ValueError("AZURE_OPENAI_KEY environment variable is required.")
         self.AZURE_OPENAI_KEY = openai_key
 
@@ -40,7 +40,6 @@ class AppConfig:
         self.AZURE_OPENAI_ENDPOINT = openai_endpoint
 
         self.project = self.create_azure_project_client()
-        self.kernel = self.initialize_kernel()
 
     def create_azure_project_client(self):
         project = AIProjectClient(
@@ -63,5 +62,13 @@ class AppConfig:
         )
 
         return kernel
+
+    def create_kernel(self):
+        """Create a new kernel instance"""
+        return self.initialize_kernel()
+
+    def get_ai_project_client(self):
+        """Get the AI project client"""
+        return self.project
 
 config = AppConfig()

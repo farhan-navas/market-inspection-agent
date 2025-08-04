@@ -6,10 +6,9 @@ from app.app_config import config
 
 from semantic_kernel.functions.kernel_arguments import KernelArguments
 
-from app.app_config import config
-
-project = config.project
-kernel = config.kernel
+# Initialize kernel and project from config
+kernel = config.create_kernel()
+project = config.get_ai_project_client()
 
 from app.skills.base_scanner_skill import BaseScannerSkill
 from app.skills.region_split_skill import RegionSplitSkill 
@@ -33,6 +32,7 @@ from app.models.rationale_model import RationaleList
 
 from app.exceptions.plugin_invocation_exception import PluginInvocationError
 
+# Initialize skills
 scanner_skill = BaseScannerSkill()
 region_split_skill = RegionSplitSkill()
 ingestion_skill = IngestionSkill()
@@ -41,13 +41,12 @@ scoring_skill = ScoringSkill()
 expansion_eval_skill = ExpansionEvalSkill()
 overall_ranking_skill = OverallRankingSkill()
 rationale_skill = RationaleSkill()
-storage_skill = StorageSkill(config.DB_CONNECTION_URL)
-# vectorize_skill = VectorizeSkill()
+storage_skill = StorageSkill(config.DATABASE_URL)
 
-# 2. Import each agent as a Semantic Kernel skill
+# Register each agent as a Semantic Kernel skill
 scanner_skill = kernel.add_plugin(scanner_skill, "Scanner")
 region_split_skill = kernel.add_plugin(region_split_skill, "Region Splitter")
-ingsestion_skill = kernel.add_plugin(ingestion_skill, "Ingestion")
+ingestion_skill = kernel.add_plugin(ingestion_skill, "Ingestion")
 classification_skill = kernel.add_plugin(classification_skill, "Classify")
 scoring_skill = kernel.add_plugin(scoring_skill, "Scoring")
 expansion_eval_skill = kernel.add_plugin(expansion_eval_skill, "Expansion Evaluation")
@@ -99,13 +98,13 @@ async def process_shard(shard: RegionSplitList) -> ExpansionEvalCompanyList:
     ingested_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies", IngestedList, KernelArguments(company_information_list=shard))
 
     # classify
-    classified_ctx = await invoke_kernel_plugin("Ingestion", "ingest_companies", ClassifiedMetricsList, KernelArguments(company_information_list=ingested_ctx))
+    classified_ctx = await invoke_kernel_plugin("Classify", "classify_companies", ClassifiedMetricsList, KernelArguments(company_information_list=ingested_ctx))
 
     # score
     scored_ctx = await invoke_kernel_plugin("Scoring", "score_companies", MetricRankingList, KernelArguments(company_information_list=classified_ctx))
 
-    # evaluaute expansion
-    expansion_eval_ctx = await invoke_kernel_plugin("Expansion Evalutation", "evaluation_expansion_companies", ExpansionEvalCompanyList, KernelArguments(company_information_list=scored_ctx))
+    # evaluate expansion
+    expansion_eval_ctx = await invoke_kernel_plugin("Expansion Evaluation", "evaluation_expansion_companies", ExpansionEvalCompanyList, KernelArguments(company_information_list=scored_ctx))
     
     return expansion_eval_ctx
 
@@ -184,7 +183,7 @@ async def run_scan(opts: dict):
     )
 
     # 9) Persist to storage
-    await invoke_kernel_plugin("Storage", "store_companies", dict, KernelArguments(company_information_list=explained_companies_list))
+    await invoke_kernel_plugin("Storage", "store_companies", dict, KernelArguments(company_information_list=explained_companies))
 
     # 10) Return explained companies to backend for validation
     return explained_companies

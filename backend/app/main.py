@@ -31,7 +31,7 @@ class CompanyPayloadType(BaseModel):
 
 @app.get("/")
 def get_root_data():
-    return { 'Welcome to Market Scanner Backend!' }
+    return { 'message': 'Welcome to Market Scanner Backend!' }
 
 @app.get("/trial")
 async def fetch_data():
@@ -40,13 +40,15 @@ async def fetch_data():
     res = await run_scan(opts)
     return { 
         "message": 'Welcome to Market Scanner Backend!', 
-        "companies": res.companies, 
-        "res": f"Persisted {len(res.companies)} company records." 
+        "companies": res.companies if hasattr(res, 'companies') else [], 
+        "res": f"Persisted {len(res.companies) if hasattr(res, 'companies') else 0} company records." 
     }
 
 @app.get('/api/scanner-chat')
 def post_chat_data(chat_payload: ChatPayloadType):
     content = chat_payload.content
+    # TODO: Implement chat functionality
+    return {"message": "Chat received", "content": content}
 
 @app.get("/api/scanner-form")
 def post_form_data(form_payload: FormPayloadType):
@@ -55,4 +57,6 @@ def post_form_data(form_payload: FormPayloadType):
 @app.get("/api/dashboard/company-name")
 def post_company_data(company_payload: CompanyPayloadType):
     company_name = company_payload.company_name
+    # TODO: Implement company data retrieval
+    return {"message": f"Company data requested for {company_name}"}
     
